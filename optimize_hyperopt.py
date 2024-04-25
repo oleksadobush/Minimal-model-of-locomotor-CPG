@@ -18,7 +18,7 @@ if __name__ == "__main__":
         search_alg=algo,
         metric="error",
         mode="min",
-        num_samples=16,
+        num_samples=56,
         resources_per_trial={"cpu": 1, "gpu": 0},
         config=config)
 

@@ -175,30 +175,26 @@ def simulation_error(params, time=80, progress_bar=False, state_neurons=300, **a
 
     s1_state = history["s1_state"]
     s2_state = history["s2_state"]
-    ##############################
     s3_state = history["s3_state"]
     s4_state = history["s4_state"]
-    ##############################
 
     try:
         sw_cycles1_l, st_cycles1_l = calc_swing_stance(s1_state)
         sw_cycles2_r, st_cycles2_r = calc_swing_stance(s2_state)
+        sw_cycles3_r, st_cycles3_r = calc_swing_stance(s3_state)
+        sw_cycles4_l, st_cycles4_l = calc_swing_stance(s4_state)
 
-        ########################################################
-        sw_cycles4_l, st_cycles4_l = calc_swing_stance(s3_state)
-        sw_cycles3_r, st_cycles3_r = calc_swing_stance(s4_state)
         ########################################################
 
         error_phase1_l, error_speed1_l = single_limb_error(sw_cycles1_l, st_cycles1_l)
         error_phase2_r, error_speed2_r = single_limb_error(sw_cycles2_r, st_cycles2_r)
-
-        #######################################################################################################
-        error_phase4_l, error_speed4_l = single_limb_error(sw_cycles4_l, st_cycles4_l)
         error_phase3_r, error_speed3_r = single_limb_error(sw_cycles3_r, st_cycles3_r)
+        error_phase4_l, error_speed4_l = single_limb_error(sw_cycles4_l, st_cycles4_l)
+
         #######################################################################################################
 
         error_phase1 = error_phase1_l + error_phase2_r
-        error_phase2 = error_phase4_l + error_speed3_r
+        error_phase2 = error_phase4_l + error_phase3_r
 
         error_speed1 = error_speed1_l + error_speed2_r
         error_speed2 = error_speed4_l + error_speed3_r
@@ -209,12 +205,11 @@ def simulation_error(params, time=80, progress_bar=False, state_neurons=300, **a
         error_symmetricity_1_2 = symmetry_error(sw_cycles1_l[1:], st_cycles2_r)
         error_symmetricity_2_1 = symmetry_error(sw_cycles2_r, st_cycles1_l[:-1])
 
-        #############################################################################################################
         error_symmetricity_4_3 = symmetry_error(sw_cycles4_l[1:], st_cycles3_r)
         error_symmetricity_3_4 = symmetry_error(sw_cycles3_r, st_cycles4_l[:-1])
 
         error_symmetricity_2_3 = symmetry_error(sw_cycles2_r[1:], st_cycles3_r)
-        error_symmetricity_3_2 = symmetry_error(sw_cycles2_r, st_cycles3_r[:-1])
+        error_symmetricity_3_2 = symmetry_error(sw_cycles3_r, st_cycles2_r[:-1])
 
         error_symmetricity_1_4 = symmetry_error(sw_cycles1_l[1:], st_cycles4_l)
         error_symmetricity_4_1 = symmetry_error(sw_cycles4_l, st_cycles1_l[:-1])
@@ -243,7 +238,7 @@ def simulation_error(params, time=80, progress_bar=False, state_neurons=300, **a
         stance4 = s4_state > 0
         ########################
 
-        sw1_in_st2 = np.sum(swing1 & stance2) / np.sum(swing1)
+        sw1_in_st2 = np.sum(swing1 & stance2) / np.sum(swing1) # 1- time when 2 leg is swinging while 1 is swinging
         sw2_in_st1 = np.sum(swing2 & stance1) / np.sum(swing2)
 
         ################################################
@@ -255,15 +250,10 @@ def simulation_error(params, time=80, progress_bar=False, state_neurons=300, **a
 
         sw3_in_st4 = np.sum(swing3 & stance4) / np.sum(swing3)
         sw4_in_st3 = np.sum(swing4 & stance3) / np.sum(swing4)
-
-        sw1_in_sw4 = 1 - (np.sum(swing1 & swing4) / np.sum(swing4))
-        sw2_in_sw3 = 1 - (np.sum(swing2 & swing3) / np.sum(swing3))
-
         ################################################
 
         error_symmetricity2 = (1 - sw1_in_st2) + (1 - sw2_in_st1) + (1 - sw3_in_st4) + (1 - sw4_in_st3) + \
-                              (1 - sw2_in_st3) + (1 - sw3_in_st2) + (1 - sw1_in_st4) + (1 - sw4_in_st1) + \
-                              (1 - sw1_in_sw4) + (1 - sw2_in_sw3)
+                              (1 - sw2_in_st3) + (1 - sw3_in_st2) + (1 - sw1_in_st4) + (1 - sw4_in_st1) 
 
     except Exception as e:
         print("error calc", e)
